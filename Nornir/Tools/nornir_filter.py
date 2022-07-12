@@ -1,7 +1,28 @@
 #! /usr/bin/python3
 """
-Simple functions to dynamically obtain filtering data for Nornir SimpleInventory.
+Simple functions to dynamically obtain data for filtering nornir SimpleInventory
 """
+
+
+def filter_host(task):
+    try:
+        prompt = input("Would you like to filter a particular host? (y/n): ")
+        if prompt.lower().strip() in ["y", "yes"]:
+            host = input("Enter hostname: ").strip()
+            if host not in task.inventory.hosts:
+                print("Please enter a valid hostname\n")
+                return filter_host()
+            else:
+                return host
+        elif prompt.lower().strip() in ["n", "no"]:
+            return
+        else:
+            print("Pleae enter a valid input\n")
+            return filter_host()
+    except Exception as error:
+        print("Please enter a valid input\n")
+        print(error)
+        return filter_host()
 
 
 def filter_building():
@@ -51,7 +72,35 @@ def filter_role():
         return filter_role()
 
 
+def filter_site():
+    sites = []
+    try:
+        prompt = input("Filter by site? (y/n): ")
+        if prompt.lower().strip() in ["y", "yes"]:
+            role = input(f"Possible options: \n{sites}\n: ")
+            if role not in sites:
+                print("Please enter a valid site\n")
+                return filter_site()
+            else:
+                return role
+        elif prompt.lower().strip() in ["n", "no"]:
+            return
+        else:
+            print("Please enter a valid input\n")
+            return filter_site()
+    except Exception as error:
+        print("Please enter a valid input\n")
+        print(error)
+        return filter_site()
+
+
 def apply_filter(task):
+    host = filter_host(task)
+    if host is not None:
+        target = task.filter(name=host)
+        return target
+    else:
+        pass
     building = filter_building()
     role = filter_role()
     if building is None and role is None:
