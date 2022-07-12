@@ -24,7 +24,10 @@ def set_site(task):
 
 
 def rotary_config(task):
-    commands = ["ip ssh port 2050 rotary 1 127"]
+    # This variable will be the starting port for your rotary groups.  They will increment by 1
+    # eg rotary 1 port 2000, rotary 2 port 2001, rotary 3 port 2002, etc
+    port = 2000
+    commands = [f"ip ssh port {port} rotary 1 127"]
     # Start line at the tty line # you want to start configuring the rotary groups.  On my devices it is line 3
     line = 3
     rotary = 1
