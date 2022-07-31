@@ -1,19 +1,21 @@
 #! /usr/bin/python3
-"""
-Simple script to convert a CSV file to a hosts.yaml file needed for Nornir inventory.
-This script was written to my needs and will need to be adjusted for a different environment.
-CSV layout is device, hostname, groups, building, role (with the later two being custom keys).
-"""
 import csv
 
-csv_file = "/path/to/csv_inventory.csv"
-yaml_file = "/path/to/output/hosts.yaml"
+"""
+Simple script to convert a CSV file a a hosts.yaml file needed for Nornir inventory.
+This script was written to my needs and will need to be adjusted for a different environment.
+CSV layout is device, hostname, groups, building.
+Other information is dynamically entered by passing values to defaults.yaml
+"""
+
+csv_file = "/home/trichbourg/Python/csv_inventory.csv"
+yaml_file = "/home/trichbourg/Python/hosts.yaml"
 
 
-def csv_to_yaml(input_file, output_file):
-    with open(input_file) as f:
+def csv_to_yaml(csv_file, yaml_file):
+    with open(csv_file) as f:
         csv_reader = csv.reader(f)
-        with open(output_file, "a") as yf:
+        with open(yaml_file, "a") as yf:
             yf.write("---")
             for row in csv_reader:
                 device = row[0]
@@ -26,7 +28,7 @@ def csv_to_yaml(input_file, output_file):
                 )
 
 
-def main() -> None:
+def main():
     csv_to_yaml(csv_file, yaml_file)
 
 
