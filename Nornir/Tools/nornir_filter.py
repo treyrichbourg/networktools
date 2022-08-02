@@ -110,7 +110,7 @@ def filter_site(task):
             if site not in sites:
                 sites.append(site)
         if prompt.lower().strip() in ["y", "yes"]:
-            role = input(f"Possible options: \n{sites}\n: ")
+            site = input(f"Possible options: \n{sites}\n: ")
             if site not in sites:
                 print("Please enter a valid site\n")
                 return filter_site(task)
