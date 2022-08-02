@@ -8,9 +8,12 @@ Simple functions to dynamically obtain data for filtering nornir SimpleInventory
 
 def confirm(task):
     switches = [target for target in task.inventory.hosts]
-    print(
-        f"You are about to target the following devices:\n{len(task.inventory.hosts)} Devices:\n{switches}"
-    )
+    if len(switches) == 1:
+        print(f"\nYou are about to target the following device:\n{switches}\n")
+    else:
+        print(
+            f"\nYou are about to target the following devices:\n{len(task.inventory.hosts)} Devices:\n{switches}\n"
+        )
     prompt = input("Continue? (y/n): ")
     try:
         if prompt.lower().strip() in ["y", "yes"]:
@@ -30,7 +33,7 @@ def filter_host(task):
             host = input("Enter hostname: ").strip()
             if host not in task.inventory.hosts:
                 print("Please enter a valid hostname\n")
-                return filter_host()
+                return filter_host(task)
             else:
                 target = task.filter(name=host)
                 return target
@@ -46,9 +49,13 @@ def filter_host(task):
 
 
 def filter_building(task):
-    building_list = [510, 511, 512, 513, 514, 516, 545, 1099, 3781, 3782]
+    building_list = []
     try:
         prompt = input("Filter by building? (y/n): ")
+        for host in task.inventory.hosts:
+            buildings = task.inventory.hosts[host]["building"]
+            if buildings not in building_list:
+                building_list.append(buildings)
         if prompt.lower().strip() in ["y", "yes"]:
             building = input(
                 f"Please enter a building number: \nPossible options: {str(building_list)}\n: "
@@ -64,7 +71,7 @@ def filter_building(task):
             return task
         else:
             print("Please enter a valid input\n")
-            return filter_building()
+            return filter_building(task)
     except Exception as error:
         print("Please enter a valid input\n")
         print(error)
@@ -87,40 +94,52 @@ def filter_role(task):
             return task
         else:
             print("Please enter a valid input\n")
-            return filter_role()
+            return filter_role(task)
     except Exception as error:
         print("Please enter a valid input\n")
         print(error)
         return filter_role(task)
 
 
-def filter_site():
-    layers = ["Corry", "San Diego", "DamNeck", "Groton"]
+def filter_site(task):
+    sites = []
     try:
         prompt = input("Filter by site? (y/n): ")
+        for host in task.inventory.hosts:
+            site = task.inventory.hosts[host]["site"]
+            if site not in sites:
+                sites.append(site)
         if prompt.lower().strip() in ["y", "yes"]:
-            role = input(f"Possible options: \n{layers}\n: ")
-            if role not in layers:
+            role = input(f"Possible options: \n{sites}\n: ")
+            if site not in sites:
                 print("Please enter a valid site\n")
-                return filter_site()
+                return filter_site(task)
             else:
-                return role
+                target = task.filter(site=site)
+                return target
         elif prompt.lower().strip() in ["n", "no"]:
-            return
+            return task
         else:
             print("Please enter a valid input\n")
-            return filter_site()
+            return filter_site(task)
     except Exception as error:
         print("Please enter a valid input\n")
         print(error)
-        return filter_site()
+        return filter_site(task)
 
 
 def exclude_host(task):
     try:
         total = len(task.inventory.hosts)
         current_selection = [target for target in task.inventory.hosts]
-        print(f"Currently you have {total} selected devices:\n{current_selection}")
+        if total == 1:
+            print(
+                f"\nCurrently you have {total} selected device:\n{current_selection}\n"
+            )
+        else:
+            print(
+                f"\nCurrently you have {total} selected devices:\n{current_selection}\n"
+            )
         prompt = input("Would you like to exclude a host from this selection?(y/n): ")
         if prompt.lower().strip() in ["y", "yes"]:
             hostnames = input(
@@ -153,25 +172,3 @@ def apply_filter(task):
     targets = filter_building(task)
     targets = filter_role(targets)
     return targets
-
-
-# def apply_filter(task):
-#     host = filter_host(task)
-#     if host is not None:
-#         target = task.filter(name=host)
-#         return target
-#     else:
-#         pass
-#     building = filter_building()
-#     role = filter_role()
-#     if building is None and role is None:
-#         return task
-#     elif building is not None and role is not None:
-#         targets = task.filter(building=building, role=role)
-#         return targets
-#     elif building is None:
-#         targets = task.filter(role=role)
-#         return targets
-#     else:
-#         targets = task.filter(building=building)
-#         return targets
