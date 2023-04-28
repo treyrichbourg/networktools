@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 import csv
+import yaml
+from datetime import date
 
 """
 Simple script to convert a CSV file a a hosts.yaml file needed for Nornir inventory.
@@ -8,28 +10,37 @@ CSV layout is device, hostname, groups, building.
 Other information is dynamically entered by passing values to defaults.yaml
 """
 
-csv_file = "/home/trichbourg/Python/csv_inventory.csv"
-yaml_file = "/home/trichbourg/Python/hosts.yaml"
+today = date.today()
+today_formatted = today.strftime("%b-%d-%Y")
 
 
-def csv_to_yaml(csv_file, yaml_file):
+csv_file = ""
+yaml_file = f""
+
+# Read csv file into a dictionary
+def parse_csv(csv_file):
     with open(csv_file) as f:
         csv_reader = csv.reader(f)
-        with open(yaml_file, "a") as yf:
-            yf.write("---")
-            for row in csv_reader:
-                device = row[0]
-                hostname = row[1]
-                group = row[2]
-                building = row[3]
-                role = row[4]
-                yf.write(
-                    f"\n{device}:\n  hostname: {hostname}\n  groups:\n    - {group}\n  data:\n    building: {building}\n    role: {role}\n"
-                )
+        data = {}
+        for row in csv_reader:
+            data[row[0]] = {
+                "hostname": row[1],
+                "groups": [row[2]],
+                "data": {"building": int(row[3])},
+            }
+    return data
+
+
+# Write yaml inventory from parsed csv data
+def write_yaml(data, yaml_file):
+    with open(yaml_file, "w") as f:
+        f.write("---\n")
+        yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
 
 def main():
-    csv_to_yaml(csv_file, yaml_file)
+    data = parse_csv(csv_file)
+    write_yaml(data, yaml_file)
 
 
 if __name__ == "__main__":
