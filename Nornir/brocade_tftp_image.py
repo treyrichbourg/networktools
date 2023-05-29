@@ -14,7 +14,7 @@ def send_file(task):
     tftp_server = "x.x.x.x"
     filename = "image"
     flash = "primary"  # primary, secondary, or bootrom
-    command = f"copy tftp flash {tftp_server} {filename} {primary}"
+    command = f"copy tftp flash {tftp_server} {filename} {flash}"
     output = task.run(netmiko_send_command, command_string=command, enable=True)
 
 
