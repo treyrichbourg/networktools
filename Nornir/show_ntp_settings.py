@@ -2,7 +2,7 @@
 from nornir import InitNornir
 from nornir_utils.plugins.functions import print_result
 from nornir_netmiko.tasks import netmiko_send_config
-from Tools.get_creds import set_credentials
+from Tools.get_creds import set_creds
 from Tools.nornir_filter import apply_filter
 
 
@@ -19,7 +19,7 @@ def show_ntp_settings(task):
 def main() -> None:
     nr = InitNornir(config_file="config.yaml")
     targets = apply_filter(nr)
-    set_credentials(targets)
+    set_creds(targets)
     result = targets.run(task=show_ntp_settings)
     print_result(result)
 
