@@ -29,7 +29,6 @@ def parse_data(data):
             vlan = row_split[7]
             vlan_filter = []
             port_name = row_split[10]
-            # port_filter = ["TerminalServer","Terminal"]
             if vlan not in vlan_filter:
                 interface_data = {
                     "Hostname": host,
