@@ -3,18 +3,9 @@ import csv
 from datetime import date
 from typing import Dict, List, Tuple
 from nornir import InitNornir
-from nornir.core.task import AggregatedResult, Result, Task
+from nornir.core.task import AggregatedResult
 from nornir_netmiko import netmiko_multiline
 from Tools import apply_filter, set_creds
-
-
-def switch_cmds(task: Task) -> Result:
-    """
-    Netmiko task to scrape output of show commands
-    """
-    commands = ["sh run | i ip address", "sh 802-1w", "sh ver"]
-    output = task.run(netmiko_multiline, commands=commands)
-    return Result(host=task.host, result=output)
 
 
 def get_host_data() -> Tuple[AggregatedResult, Dict[str, str], Dict[str, int]]:
@@ -26,6 +17,7 @@ def get_host_data() -> Tuple[AggregatedResult, Dict[str, str], Dict[str, int]]:
     nr = InitNornir(config_file="config.yaml")
     roles: Dict[str, str] = {}
     location: Dict[str, int] = {}
+    commands = ["sh run | i ip address", "sh 802-1w", "sh ver"]
 
     for host, host_obj in nr.inventory.hosts.items():
         roles[host] = host_obj["role"]
@@ -33,7 +25,7 @@ def get_host_data() -> Tuple[AggregatedResult, Dict[str, str], Dict[str, int]]:
 
     targets = apply_filter(nr)
     set_creds(targets)
-    result = targets.run(task=switch_cmds)
+    result = targets.run(netmiko_multiline, commands=commands)
     return result, roles, location
 
 
@@ -51,7 +43,11 @@ def parse_host_data(
     serial_pattern = "Serial  #:.{11}"
     version_pattern = r"\sVersion\s08.0.{8}"
     for hostname in host_data:
-        output = str(host_data[hostname][1])
+        if host_data[hostname].failed:
+            print(f"*****{hostname} IS OFFLINE*****")
+            continue
+
+        output = str(host_data[hostname][0])
         grab_ip = re.search(ip_pattern, output, re.MULTILINE)
         grab_mac = re.search(mac_pattern, output, re.MULTILINE)
         grab_serial = re.search(serial_pattern, output, re.MULTILINE)
